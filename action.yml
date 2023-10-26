@@ -2,6 +2,7 @@ name: 'Porter tool installer'
 description: 'Install the porter binary.'
 branding:
   color: 'blue'
+  icon: 'arrow-down-circle'
 runs:
   using: 'composite'
   steps:
