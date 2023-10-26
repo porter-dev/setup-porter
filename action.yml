@@ -1,0 +1,11 @@
+name: 'Porter tool installer'
+description: 'Install the porter binary.'
+branding:
+  color: 'blue'
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Porter
+      shell: bash
+      run: |
+        /bin/bash -c "$(curl -fsSL https://install.porter.run)"
