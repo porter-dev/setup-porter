@@ -1,5 +1,11 @@
 name: 'Porter tool installer'
 description: 'Install the porter binary.'
+
+inputs:
+  tagged_release:
+    description: 'Specific Porter version to install'
+    required: false
+    
 branding:
   color: 'blue'
   icon: 'arrow-down-circle'
@@ -9,4 +15,8 @@ runs:
     - name: Setup Porter
       shell: bash
       run: |
-        /bin/bash -c "$(curl -fsSL https://install.porter.run)"
+        INSTALL_URL="https://install.porter.run"
+        if [ -n "${{ inputs.tagged_release }}" ]; then
+          INSTALL_URL="${INSTALL_URL}?version=${{ inputs.tagged_release }}"
+        fi
+        /bin/bash -c "$(curl -fsSL $INSTALL_URL)"
