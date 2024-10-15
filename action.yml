@@ -20,3 +20,4 @@ runs:
           INSTALL_URL="${INSTALL_URL}?version=${{ inputs.tagged_release }}"
         fi
         /bin/bash -c "$(curl -fsSL $INSTALL_URL)"
+        porter version
