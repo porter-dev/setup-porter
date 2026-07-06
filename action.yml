@@ -7,10 +7,9 @@ inputs:
     required: false
   allow_unstable:
     description: >-
-      When true, install the most recently published release, whether or not
-      it has been promoted to latest. Falls back to the latest promoted
-      release if the newest release cannot be resolved. Defaults to false,
-      which installs the latest promoted release.
+      Internal — used by Porter's own CI to install the most recently
+      published release before it is marked latest. Not intended for general
+      use. By default the latest release is installed.
     required: false
     default: 'false'
 
@@ -30,12 +29,13 @@ runs:
         VERSION="$TAGGED_RELEASE"
         if [ -z "$VERSION" ] && [ "$ALLOW_UNSTABLE" = "true" ]; then
           VERSION=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" \
-            "https://api.github.com/repos/porter-dev/releases/releases?per_page=1" \
-            | sed -n 's/.*"tag_name": "\(v[0-9][0-9A-Za-z.+-]*\)".*/\1/p' | head -1) || true
+            "https://api.github.com/repos/porter-dev/releases/releases?per_page=30" \
+            | jq -r '[.[] | select((.draft or .prerelease) | not)][0].tag_name // empty' \
+            | grep -Ex 'v[0-9][0-9A-Za-z.+-]*') || VERSION=""
           if [ -n "$VERSION" ]; then
             echo "Resolved newest release: $VERSION"
           else
-            echo "[WARNING] Could not resolve the newest release from GitHub; falling back to the latest promoted release"
+            echo "[WARNING] Could not resolve the newest release from GitHub; falling back to the latest release"
           fi
         fi
 
