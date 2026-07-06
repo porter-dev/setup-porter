@@ -24,16 +24,17 @@ steps:
 
 ### Installing the newest release, promoted or not
 
-Setting `edge: true` installs the most recently published release, even if it
-has not yet been promoted to latest. Useful for verifying a release before
-promotion.
+Setting `allow_unstable: true` installs the most recently published release,
+even if it has not yet been promoted to latest. Useful for verifying a
+release before promotion. If the newest release cannot be resolved, the
+action falls back to the latest promoted release.
 
 ```yaml
 steps:
   - name: Run a Porter CLI command
     uses: porter-dev/setup-porter@v0.1.0
     with:
-      edge: true
+      allow_unstable: true
 ```
 
-`tagged_release` takes precedence over `edge` when both are set.
+`tagged_release` takes precedence over `allow_unstable` when both are set.
