@@ -6,10 +6,7 @@ inputs:
     description: 'Specific Porter version to install (e.g. v0.68.13). Takes precedence over allow_unstable.'
     required: false
   allow_unstable:
-    description: >-
-      Internal — used by Porter's own CI to install the most recently
-      published release before it is marked latest. Not intended for general
-      use. By default the latest release is installed.
+    description: Intended for internal use. By default the latest release is installed.
     required: false
     default: 'false'
 
