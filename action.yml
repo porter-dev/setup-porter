@@ -3,9 +3,13 @@ description: 'Install the porter binary.'
 
 inputs:
   tagged_release:
-    description: 'Specific Porter version to install'
+    description: 'Specific Porter version to install (e.g. v0.68.13). Takes precedence over allow_unstable.'
     required: false
-    
+  allow_unstable:
+    description: Intended for internal use. By default the latest release is installed.
+    required: false
+    default: 'false'
+
 branding:
   color: 'blue'
   icon: 'arrow-down-circle'
@@ -14,10 +18,27 @@ runs:
   steps:
     - name: Setup Porter
       shell: bash
+      env:
+        TAGGED_RELEASE: ${{ inputs.tagged_release }}
+        ALLOW_UNSTABLE: ${{ inputs.allow_unstable }}
+        GH_TOKEN: ${{ github.token }}
       run: |
-        INSTALL_URL="https://install.porter.run"
-        if [ -n "${{ inputs.tagged_release }}" ]; then
-          INSTALL_URL="${INSTALL_URL}?version=${{ inputs.tagged_release }}"
+        VERSION="$TAGGED_RELEASE"
+        if [ -z "$VERSION" ] && [ "$ALLOW_UNSTABLE" = "true" ]; then
+          VERSION=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/porter-dev/releases/releases?per_page=30" \
+            | jq -r '[.[] | select((.draft or .prerelease) | not)][0].tag_name // empty' \
+            | grep -Ex 'v[0-9][0-9A-Za-z.+-]*') || VERSION=""
+          if [ -n "$VERSION" ]; then
+            echo "Resolved newest release: $VERSION"
+          else
+            echo "[WARNING] Could not resolve the newest release from GitHub; falling back to the latest release"
+          fi
         fi
-        /bin/bash -c "$(curl -fsSL $INSTALL_URL)"
+
+        INSTALL_URL="https://install.porter.run"
+        if [ -n "$VERSION" ]; then
+          INSTALL_URL="${INSTALL_URL}?version=${VERSION}"
+        fi
+        /bin/bash -c "$(curl -fsSL "$INSTALL_URL")"
         porter version
